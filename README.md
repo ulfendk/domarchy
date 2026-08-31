@@ -9,7 +9,7 @@ Beautiful, Modern & Opinionated Dockerized Linux. This repo exists primarily as 
 ## Getting Started
 
 ```bash
-docker compose up -d --build
+docker compose up -d
 ```
 
 Connect to the VM display: [http://localhost:8900](http://localhost:8900)
