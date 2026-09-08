@@ -8,6 +8,9 @@
 services:
   domarchy:
     image: ghcr.io/ulfendk/domarchy:latest
+    # :latest is a moving tag - without this, a redeploy can silently reuse
+    # whatever was pulled last time instead of picking up a new push.
+    pull_policy: always
     container_name: domarchy
     ports:
       - "3389:3389"
