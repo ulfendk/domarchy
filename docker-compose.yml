@@ -7,6 +7,7 @@ services:
     container_name: domarchy
     ports:
       - "5900:5900"
+      - "3389:3389"
     environment:
       - DISPLAY=:0
       - MEMORY=8G

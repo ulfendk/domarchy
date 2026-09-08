@@ -38,6 +38,10 @@ else
     echo "No PulseAudio socket at /tmp/pulse.socket - starting without audio."
 fi
 
+# 3389 is forwarded straight into the guest for hypr-rdp (a native RDP
+# server for Hyprland - see README) once it's installed and enabled there;
+# nothing listens on it until that one-time in-guest setup is done. VNC on
+# 5900 stays available for the installer and as a console fallback.
 exec qemu-system-x86_64 \
     -m $MEMORY -smp $CPUS -machine q35,accel=kvm:tcg \
     -drive file="$DISK",format=qcow2 \
@@ -46,5 +50,5 @@ exec qemu-system-x86_64 \
     -display vnc=0.0.0.0:0 \
     -device VGA,edid=on,xres=1920,yres=1080,vgamem_mb=32 \
     "${AUDIO_ARGS[@]}" \
-    -net user,smb=/shared \
+    -net user,smb=/shared,hostfwd=tcp::3389-:3389 \
     -net nic
