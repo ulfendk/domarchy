@@ -26,10 +26,30 @@ fi
 # VNC framebuffer on 127.0.0.1:5900 (see xrdp.ini), so any RDP client can
 # drive the VM without anything extra running inside the guest.
 mkdir -p /var/run/xrdp /var/log/xrdp
+# Clear stale pid files from a previous run of this same container (e.g.
+# after a crash + restart) - xrdp-sesman/xrdp refuse to start otherwise.
+rm -f /var/run/xrdp-sesman.pid /var/run/xrdp.pid
 [[ -f /etc/xrdp/rsakeys.ini ]] || xrdp-keygen xrdp /etc/xrdp/rsakeys.ini
 
 xrdp-sesman &
 xrdp --nodaemon &
+
+# Audio is optional: only wire up -audiodev when a real PulseAudio socket
+# is mounted at /tmp/pulse.socket (see the docker-compose volume). A
+# missing/unusable socket makes QEMU exit immediately, which - since QEMU
+# is the container's main process - kills the whole container. Servers
+# without a host PulseAudio session (e.g. Portainer test boxes) just get
+# no sound instead of a boot loop.
+AUDIO_ARGS=()
+if [[ -S /tmp/pulse.socket ]]; then
+    AUDIO_ARGS=(
+        -audiodev pa,id=audio0,server=unix:/tmp/pulse.socket
+        -device ich9-intel-hda
+        -device hda-output,audiodev=audio0
+    )
+else
+    echo "No PulseAudio socket at /tmp/pulse.socket - starting without audio."
+fi
 
 exec qemu-system-x86_64 \
     -m $MEMORY -smp $CPUS -machine q35,accel=kvm:tcg \
@@ -38,8 +58,6 @@ exec qemu-system-x86_64 \
     -boot order=$BOOT_ORDER \
     -display vnc=127.0.0.1:0 \
     -device VGA,edid=on,xres=1920,yres=1080,vgamem_mb=32 \
-    -audiodev pa,id=audio0,server=unix:/tmp/pulse.socket \
-    -device ich9-intel-hda \
-    -device hda-output,audiodev=audio0 \
+    "${AUDIO_ARGS[@]}" \
     -net user,smb=/shared \
     -net nic

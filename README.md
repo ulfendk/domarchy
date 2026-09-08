@@ -36,6 +36,8 @@ Every push to `main` (and every `v*` tag) is built and published to GHCR by [`gh
 
 In Portainer, add a stack pointing at this repository with **Compose path** set to `docker-compose.ghcr.yml` (or paste that file's contents into the Web editor) and deploy. Since the image is public, no registry credentials are needed. To pick up a new push, use the stack's **Pull and redeploy** action (or re-deploy after re-pointing the image tag at a specific `sha-` build).
 
+**N.B.** If the container ever crashes and restarts *before* the Omarchy installer finished, `data/omarchy.qcow2` will already exist as an empty disk - the entrypoint only attaches the install ISO when that file doesn't exist yet. Delete `data/omarchy.qcow2` (or the whole `data/` volume) before redeploying to get a fresh installer boot.
+
 ## Keyboard Shortcuts
 
 When running domarchy inside Omarchy, keyboard shortcuts will be intercepted by the host. To forward all shortcuts to the container, add the following to your host's Hyprland config:
