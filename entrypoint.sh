@@ -22,14 +22,21 @@ else
     BOOT_ORDER="d"
 fi
 
-websockify --web /opt/novnc 8900 localhost:5900 &
+# RDP access: xrdp listens on 3389 and bridges straight through to QEMU's
+# VNC framebuffer on 127.0.0.1:5900 (see xrdp.ini), so any RDP client can
+# drive the VM without anything extra running inside the guest.
+mkdir -p /var/run/xrdp /var/log/xrdp
+[[ -f /etc/xrdp/rsakeys.ini ]] || xrdp-keygen xrdp /etc/xrdp/rsakeys.ini
+
+xrdp-sesman &
+xrdp --nodaemon &
 
 exec qemu-system-x86_64 \
     -m $MEMORY -smp $CPUS -machine q35,accel=kvm:tcg \
     -drive file="$DISK",format=qcow2 \
     $CDROM_OPTION \
     -boot order=$BOOT_ORDER \
-    -display vnc=:0 \
+    -display vnc=127.0.0.1:0 \
     -device VGA,edid=on,xres=1920,yres=1080,vgamem_mb=32 \
     -audiodev pa,id=audio0,server=unix:/tmp/pulse.socket \
     -device ich9-intel-hda \
