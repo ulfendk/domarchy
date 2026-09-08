@@ -13,7 +13,7 @@ services:
     pull_policy: always
     container_name: domarchy
     ports:
-      - "3389:3389"
+      - "5900:5900"
     environment:
       - DISPLAY=:0
       - MEMORY=8G
