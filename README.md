@@ -32,7 +32,7 @@ Every push to `main` (and every `v*` tag) is built and published to GHCR by [`gh
 - `ghcr.io/ulfendk/domarchy:sha-xxxxxxx` - a specific commit
 - `ghcr.io/ulfendk/domarchy:X.Y.Z` - a tagged release
 
-**One-time step:** GHCR packages don't automatically inherit their repo's visibility. After the first workflow run, go to the package page (`github.com/ulfendk/domarchy/pkgs/container/domarchy` -> Package settings) and set visibility to **Public**, otherwise Portainer will get a 401/403 trying to pull it.
+`ghcr.io/ulfendk/domarchy` is public (verified via an anonymous pull), so Portainer can pull it with no registry credentials configured. If a future push ever comes back private, check the package's settings page (`github.com/ulfendk/domarchy/pkgs/container/domarchy`) and set visibility to **Public**.
 
 In Portainer, add a stack pointing at this repository with **Compose path** set to `docker-compose.ghcr.yml` (or paste that file's contents into the Web editor) and deploy. Since the image is public, no registry credentials are needed. To pick up a new push, use the stack's **Pull and redeploy** action (or re-deploy after re-pointing the image tag at a specific `sha-` build).
 
